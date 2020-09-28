@@ -1,0 +1,32 @@
+#####
+# Build
+#####
+COMMON_MAKEFILE              = Makefile.common
+BUILD_MAKEFILE               = Makefile.build
+
+PROJECT                      = docmm4j
+IMAGE_COMPILE                = $(PROJECT)_app_compile
+IMAGE_WEB_APP                = $(PROJECT)_web_app
+COMPILE_DOCKERFILE           = ./Dockerfile.app.compile
+APP_DOCKERFILE               = ./Dockerfile.jar.app
+
+HOST_APP_COMPILE_VOLUME      = `pwd`
+CONTAINER_APP_COMPILE_VOLUME = /home/$(PROJECT)
+LOCAL_DEPENDENCY_REPOSITORY  = ${MVN_LOCAL_REPO_HOME}
+HOST_MVN_LOCAL_REPO          = $(shell [ -z echo $(LOCAL_DEPENDENCY_REPOSITORY) ] && echo ${HOME}/.m2 || echo $(LOCAL_DEPENDENCY_REPOSITORY))
+CONTAINER_MVN_USER_HOME      = /root
+CONTAINER_MVN_LOCAL_REPO     = $(CONTAINER_MVN_USER_HOME)/.m2
+
+APP_NAME                     = $(PROJECT)
+BUILD_VERSION                = `git rev-parse HEAD | cut -c 1-6`
+BUILD_DATETIME               = `date`
+VERSION_FILE                 = ./BUILD_VERSION.txt
+BUILD_VERSION_STATIC         = `cat $(VERSION_FILE)`
+
+LOGGING_LEVEL                = DEBUG
+APP_SERVER_PORT              = 8181
+APP_COMPOSE_FILE_NAME        = docker-compose.yml
+
+SPRING_DATA_MONGODB_HOST     = mongo
+MONGO_IMAGE_VERSION          = latest
+MONGO_DB_PORT                = 27017

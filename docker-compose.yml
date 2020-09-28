@@ -1,12 +1,17 @@
 version: '3'
 services:
   web:
-    build: .
+    image: ${IMAGE_WEB_APP}:${BUILD_VERSION}
     ports:
-      - 8080:8080
+      - ${APP_SERVER_PORT}:${APP_SERVER_PORT}
     environment:
-      - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_DATA_MONGODB_HOST=${SPRING_DATA_MONGODB_HOST}
+      - APP_SERVER_PORT=${APP_SERVER_PORT}
+      - LOGGING_LEVEL=${LOGGING_LEVEL}
+    depends_on:
+      - mongo
+
   mongo:
-    image: mongo:latest
+    image: mongo:${MONGO_IMAGE_VERSION}
     ports:
-    - 27017:27017
+      - ${MONGO_DB_PORT}:27017

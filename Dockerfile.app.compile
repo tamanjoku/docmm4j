@@ -1,0 +1,12 @@
+FROM maven:3.6.1-jdk-13-alpine
+MAINTAINER Torti Ama-Njoku <torti.ama-njoku@tocchae.com>
+
+# Switch the user to root
+USER root
+
+ARG appDir
+
+WORKDIR ${appDir}
+
+ENTRYPOINT \
+      mvn clean install -DskipTests

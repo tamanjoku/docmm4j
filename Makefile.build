@@ -1,0 +1,76 @@
+include ./Makefile.constants
+
+#***************************************************************************#
+#*************************** ENV VAR BLOCKS ********************************#
+#***************************************************************************#
+
+APP_DOCKER_VARS = printf "%s\n" \
+	"LOGGING_LEVEL=$(LOGGING_LEVEL)"\
+    "APP_SERVER_PORT=$(APP_SERVER_PORT)"\
+    "BUILD_VERSION=$(BUILD_VERSION_STATIC)"\
+    "IMAGE_WEB_APP=$(IMAGE_WEB_APP)"\
+    "SPRING_DATA_MONGODB_HOST=$(SPRING_DATA_MONGODB_HOST)"\
+    "MONGO_IMAGE_VERSION=$(MONGO_IMAGE_VERSION)"\
+    "MONGO_DB_PORT=$(MONGO_DB_PORT)"\
+     >> .env
+
+###################
+# Common Rules
+###################
+
+echo_build_version:
+	echo $(BUILD_VERSION) > $(VERSION_FILE)
+
+rm_env:
+	@rm -f .env
+
+rm_build_dirs:
+	@rm -rf ./target
+
+###################
+# Exec Rules
+###################
+
+build_compile:
+	docker build \
+	--file=$(COMPILE_DOCKERFILE) \
+	-t=$(IMAGE_COMPILE) \
+	--build-arg appDir=$(CONTAINER_APP_COMPILE_VOLUME) \
+	.
+
+run_compile_image:
+	@docker run \
+	-v $(HOST_APP_COMPILE_VOLUME):$(CONTAINER_APP_COMPILE_VOLUME) \
+	-v $(HOST_MVN_LOCAL_REPO):$(CONTAINER_MVN_LOCAL_REPO) \
+	--rm \
+	$(IMAGE_COMPILE)
+
+compile: \
+	build_compile \
+	run_compile_image
+
+build_web_app:
+	@docker build \
+	--file=$(APP_DOCKERFILE) \
+	-t=$(IMAGE_WEB_APP):$(BUILD_VERSION_STATIC) \
+	--build-arg appJarFilename=$(PROJECT) \
+	.
+
+build_app: \
+	echo_build_version \
+	build_web_app
+
+build_app_images: \
+	rm_build_dirs \
+	compile \
+	build_app
+
+app_up: \
+	rm_env
+	@$(APP_DOCKER_VARS)
+	docker-compose -f $(APP_COMPOSE_FILE_NAME) up
+
+app_down: \
+	rm_env
+	@$(APP_DOCKER_VARS)
+	docker-compose -f $(APP_COMPOSE_FILE_NAME) down
